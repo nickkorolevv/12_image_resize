@@ -1,7 +1,25 @@
-# Image Resizer
 
-[TODO. There will be project description]
 
-# Project Goals
+#  Изменения размера фотографии
+Скрипт принимает на вход изображение и кладёт изображение с новым размером куда скажет пользователь или рядом с исходным. У него есть обязательный аргумент – путь до исходной картинки. И несколько необязательных: `width` - ширина результирующей картинки, `height` - её высота, `scale` - во сколько раз увеличить изображение (может быть меньше 1), `output` - куда класть результирующий файл.
 
-The code is written for educational purposes. Training course for web-developers - [DEVMAN.org](https://devman.org)
+# Как установить
+Для работы скрипта Вам потребуется библиотека PIL
+Для того, чтобы ее установить выполните следующую команду.
+```bash
+pip install -r requirements.txt # alternatively try pip3
+```
+Рекомендуется использовать виртуальное окружение
+# Быстрый старт
+В командной строке введите
+``` bash 
+python image_resize.py --scale 2 photo.jpg --output C:\resize_image
+```
+или
+```bash
+python image_resize.py --width 1280 --height 720 
+```
+
+# Цели проекта
+Код создан в учебных целях. В рамках учебного курса по веб-разработке -  [DEVMAN.org](https://devman.org/)
+
