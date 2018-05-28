@@ -78,11 +78,10 @@ if __name__ == "__main__":
     height = namespace.height
     if namespace.output is None:
         output_image_path = "{}__".format(input_image_path[:-4])
-    else:
-        output_image_path = "{}\{}__".format(
-            namespace.output,
-            input_image_path[:-4]
-        )
+    output_image_path = "{}\{}__".format(
+        namespace.output,
+        input_image_path[:-4]
+    )
     if (scale and width and height):
         exit("Ошибка")
     if scale:
@@ -91,4 +90,3 @@ if __name__ == "__main__":
         scale_by_wh(input_image_path, output_image_path, width, height)
     elif (width or height):
         resize_image(input_image_path, output_image_path, width, height)
-    print("Готово")
