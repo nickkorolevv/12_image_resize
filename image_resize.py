@@ -57,11 +57,12 @@ def scale_by_thumbnail(output_image_path, max_size):
 if __name__ == "__main__":
     parser = create_parser()
     namespace = parser.parse_args()
-    scale, input_image_path, width, height = (namespace.scale,
-                                              namespace.input,
-                                              namespace.width,
-                                              namespace.height
-                                              )
+    scale, input_image_path, width, height = (
+        namespace.scale,
+        namespace.input,
+        namespace.width,
+        namespace.height
+    )
     if not(os.path.exists(namespace.input)):
         exit("Файла не сущетсвует")
     if namespace.output is None:
