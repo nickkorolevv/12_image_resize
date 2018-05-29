@@ -1,5 +1,7 @@
 from PIL import Image
 import argparse
+import os
+import logging
 
 
 def create_parser():
@@ -12,29 +14,26 @@ def create_parser():
     return parser
 
 
-def scale_image(input_image_path, output_image_path, scale):
-    original_image = Image.open(input_image_path)
-    width, height = original_image.size
-    print("Исходное изображение {}x{}".format(width, height))
-    new_size = (int(scale*width), int(scale*height))
-    resized_image = original_image.resize(new_size, Image.ANTIALIAS)
-    out_image_path = "{}{}x{}.jpg".format(
-        output_image_path,
-        new_size[0],
-        new_size[1]
-    )
-    resized_image.save(out_image_path)
-    scaled_image = Image.open(out_image_path)
-    new_width, new_height = scaled_image.size
-    print("Формат полученного изображения {}x{}".format(new_width, new_height))
-
-
-def scale_by_wh(input_image_path, output_image_path, width, height):
+def get_sizes(input_image_path, width, height, scale):
     original_image = Image.open(input_image_path)
     width_original, height_original = original_image.size
-    print("Исходное изображение {}x{}".format(width_original, height_original))
-    max_size = (width, height)
-    print("Возможно изображение будет непропорциальным")
+    if (width and height):
+        max_size = (width, height)
+        logging.warning("Изображение может быть непропорциональным")
+        return max_size
+    elif width:
+        max_size = (width, height_original)
+        return max_size
+    elif height:
+        max_size = (width_original, height)
+        return max_size
+    elif scale:
+        max_size = (int(scale*width_original), int(scale*height_original))
+        return max_size
+
+
+def scale_by_resize(output_image_path, max_size):
+    original_image = Image.open(input_image_path)
     resized_image = original_image.resize(max_size, Image.ANTIALIAS)
     out_image_path = "{}{}x{}.jpg".format(
         output_image_path,
@@ -42,21 +41,10 @@ def scale_by_wh(input_image_path, output_image_path, width, height):
         max_size[1]
     )
     resized_image.save(out_image_path)
-    scaled_image = Image.open(out_image_path)
-    width, height = scaled_image.size
-    print("Формат полученного изображения {}x{}".format(width, height))
 
 
-def resize_image(input_image_path, output_image_path, width=None, height=None):
+def scale_by_thumbnail(output_image_path, max_size):
     original_image = Image.open(input_image_path)
-    width_original, height_original = original_image.size
-    print("Исходное изображение {}x{}".format(width_original, height_original))
-    if width:
-        max_size = (width, height_original)
-    elif height:
-        max_size = (width_original, height)
-    else:
-        raise RuntimeError("Ширина или высота не заданы!")
     original_image.thumbnail(max_size, Image.ANTIALIAS)
     out_image_path = "{}{}x{}.jpg".format(
         output_image_path,
@@ -64,9 +52,6 @@ def resize_image(input_image_path, output_image_path, width=None, height=None):
         max_size[1]
     )
     original_image.save(out_image_path)
-    scaled_image = Image.open(out_image_path)
-    width, height = scaled_image.size
-    print("Формат полученного изображения {}x{}".format(width, height))
 
 
 if __name__ == "__main__":
@@ -77,16 +62,26 @@ if __name__ == "__main__":
                                               namespace.width,
                                               namespace.height
                                               )
+    if not(os.path.exists(namespace.input)):
+        exit("Файла не сущетсвует")
     if namespace.output is None:
-        output_image_path = "{}__".format(input_image_path[:-4])
-    else:
-        output_image_path = "{}\{}__".format(
-            namespace.output,
-            input_image_path[:-4]
+        output_dir = os.getcwd()
+        output_image_path = os.path.join(
+            output_dir,
+            os.path.splitext(input_image_path)[0]
         )
-    if scale:
-        scale_image(input_image_path, output_image_path, scale)
-    elif (width and height):
-        scale_by_wh(input_image_path, output_image_path, width, height)
+    else:
+        output_dir = namespace.output
+        output_image_path = os.path.join(
+            output_dir,
+            os.path.splitext(input_image_path)[0]
+        )
+    if not(os.path.isdir(output_dir)):
+        exit("Директории не существует")
+    max_size = get_sizes(input_image_path, width, height, scale)
+    if (width and height) or scale:
+        if (width and height and scale):
+            exit("Ошибка!")
+        scale_by_resize(output_image_path, max_size)
     elif (width or height):
-        resize_image(input_image_path, output_image_path, width, height)
+        scale_by_thumbnail(output_image_path, max_size)
