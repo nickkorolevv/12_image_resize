@@ -63,8 +63,6 @@ if __name__ == "__main__":
         namespace.width,
         namespace.height
     )
-    if not(os.path.exists(namespace.input)):
-        exit("Файла не сущетсвует")
     if namespace.output is None:
         output_dir = os.getcwd()
         output_image_path = os.path.join(
@@ -81,8 +79,6 @@ if __name__ == "__main__":
         exit("Директории не существует")
     max_size = get_sizes(input_image_path, width, height, scale)
     if (width and height) or scale:
-        if (width and height and scale):
-            exit("Ошибка!")
         scale_by_resize(output_image_path, max_size)
     elif (width or height):
         scale_by_thumbnail(output_image_path, max_size)
