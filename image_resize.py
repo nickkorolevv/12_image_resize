@@ -72,10 +72,11 @@ def resize_image(input_image_path, output_image_path, width=None, height=None):
 if __name__ == "__main__":
     parser = create_parser()
     namespace = parser.parse_args()
-    scale = namespace.scale
-    input_image_path = namespace.input
-    width = namespace.width
-    height = namespace.height
+    scale, input_image_path, width, height = (namespace.scale,
+                                              namespace.input,
+                                              namespace.width,
+                                              namespace.height
+                                              )
     if namespace.output is None:
         output_image_path = "{}__".format(input_image_path[:-4])
     else:
@@ -83,8 +84,6 @@ if __name__ == "__main__":
             namespace.output,
             input_image_path[:-4]
         )
-    if (scale and width and height):
-        exit("Ошибка")
     if scale:
         scale_image(input_image_path, output_image_path, scale)
     elif (width and height):
