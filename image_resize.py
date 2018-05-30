@@ -19,6 +19,8 @@ def check_input(parsargs):
     else:
         return parsargs
 
+def check_path():
+    pass
 
 def get_original_sizes():
     return orig_img.size
@@ -39,6 +41,8 @@ def get_sizes(scale, original_sizes, width=None, height=None):
     width_original, height_original = original_sizes
     if (width and height):
         created_size = (width, height)
+        if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
+            print("Изображение может быть непропорциональным")
         return created_size
     elif width:
         created_size = (
@@ -96,9 +100,6 @@ if __name__ == "__main__":
         exit("Файла не сущетсвует")
     if scale and (width or height):
         exit("Ошибка! Невозможно задать высоту, ширину и масштаб одновременно")
-    if width and height:
-        if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
-            print("Изображение может быть непропорциональным")
     created_size = get_sizes(scale, orig_img.size, width, height)
     output_image_path = get_output_path(created_size, output_dir)
     change_image(output_image_path, created_size)
