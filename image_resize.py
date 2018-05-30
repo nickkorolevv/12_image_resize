@@ -85,10 +85,9 @@ def change_image(output_image_path, created_size):
 if __name__ == "__main__":
     parser = create_parser()
     parsargs = parser.parse_args()
-    scale, input_image_path = (parsargs.scale, parsargs.input)
+    scale, input_image_path, output_dir = (parsargs.scale, parsargs.input, parsargs.output)
     width, height = (parsargs.width, parsargs.height)
     orig_img = Image.open(input_image_path)
-    output_dir = parsargs.output
     if check_input(parsargs) is None:
         exit("Параметры не введены")
     if output_dir and not(os.path.isdir(output_dir)):
@@ -100,8 +99,7 @@ if __name__ == "__main__":
     if width and height:
         if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
             print("Изображение может быть непропорциональным")
-    original_sizes = get_original_sizes()
-    created_size = get_sizes(scale, original_sizes, width, height)
+    created_size = get_sizes(scale, orig_img.size, width, height)
     output_image_path = get_output_path(created_size, output_dir)
     change_image(output_image_path, created_size)
     print("Готово!")
