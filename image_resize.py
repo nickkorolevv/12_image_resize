@@ -19,9 +19,7 @@ def check_input(parsargs):
     else:
         return parsargs
 
-def check_path():
-    pass
-
+    
 def get_original_sizes():
     return orig_img.size
 
