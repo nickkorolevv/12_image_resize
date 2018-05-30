@@ -15,11 +15,13 @@ def create_parser():
 
 def check_input(parsargs):
     if not(parsargs.height or parsargs.width or parsargs.scale):
-        exit("Не введен ни один параметр!")
+        return None
+    else:
+        return parsargs
 
 
 def get_original_sizes():
-    return original_image.size
+    return orig_img.size
 
 
 def get_ratio(new_size, original_size):
@@ -76,22 +78,19 @@ def get_output_path(created_size, output_dir):
 
 
 def change_image(output_image_path, created_size):
-    resized_image = original_image.resize(created_size, Image.ANTIALIAS)
+    resized_image = orig_img.resize(created_size, Image.ANTIALIAS)
     resized_image.save(output_image_path)
 
 
 if __name__ == "__main__":
     parser = create_parser()
     parsargs = parser.parse_args()
-    scale, input_image_path, width, height = (
-        parsargs.scale,
-        parsargs.input,
-        parsargs.width,
-        parsargs.height
-    )
-    check_input(parsargs)
-    original_image = Image.open(input_image_path)
+    scale, input_image_path = (parsargs.scale, parsargs.input)
+    width, height = (parsargs.width, parsargs.height)
+    orig_img = Image.open(input_image_path)
     output_dir = parsargs.output
+    if check_input(parsargs) is None:
+        exit("Параметры не введены")
     if output_dir and not(os.path.isdir(output_dir)):
         exit("Такой директории не существует")
     if not(os.path.exists(parsargs.input)):
@@ -99,12 +98,7 @@ if __name__ == "__main__":
     if scale and (width or height):
         exit("Ошибка! Невозможно задать высоту, ширину и масштаб одновременно")
     if width and height:
-        if is_ratio_changed(
-                original_image.size[0],
-                original_image.size[1],
-                width,
-                height
-        ):
+        if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
             print("Изображение может быть непропорциональным")
     original_sizes = get_original_sizes()
     created_size = get_sizes(scale, original_sizes, width, height)
