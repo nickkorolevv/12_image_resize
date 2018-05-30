@@ -19,10 +19,6 @@ def check_input(parsargs):
     else:
         return parsargs
 
-    
-def get_original_sizes():
-    return orig_img.size
-
 
 def get_ratio(new_size, original_size):
     ratio = (new_size / float(original_size))
