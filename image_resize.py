@@ -13,7 +13,7 @@ def create_parser():
     return parser
 
 
-def check_args(height, width, scale, output_dir, input_image_path):
+def check_args(height, width, scale, output_dir, input_image_path, parser):
     if not(height or width or scale):
         parser.error("Параметры не введены")
     if output_dir and not (os.path.isdir(output_dir)):
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         parsargs.output
     )
     width, height = (parsargs.width, parsargs.height)
-    check_args(height, width, scale, output_dir, input_image_path)
+    check_args(height, width, scale, output_dir, input_image_path, parser)
     orig_img = Image.open(input_image_path)
     if width and height:
         if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
