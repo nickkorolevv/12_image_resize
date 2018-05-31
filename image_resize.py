@@ -1,7 +1,6 @@
 from PIL import Image
 import argparse
 import os
-from argparse import ArgumentTypeError
 
 
 def create_parser():
@@ -16,13 +15,13 @@ def create_parser():
 
 def check_args(height, width, scale, output_dir, input_image_path):
     if not(height or width or scale):
-        raise ArgumentTypeError("Параметры не введены")
+        parser.error("Параметры не введены")
     if output_dir and not (os.path.isdir(output_dir)):
-        raise FileNotFoundError("Такой директории не существует")
+        parser.error("Такой директории не существует")
     if not (os.path.exists(input_image_path)):
-        raise FileNotFoundError("Файла не сущетсвует")
+        parser.error("Файла не сущетсвует")
     if scale and (width or height):
-        raise ArgumentTypeError(
+        parser.error(
             "Ошибка! Невозможно задать высоту, ширину и масштаб одновременно"
         )
 
@@ -60,17 +59,19 @@ def get_sizes(scale, original_sizes, width=None, height=None):
         return target_size
 
 
-def get_output_path(target_size, output_dir):
+def get_output_path(target_size, output_dir, input_image_path):
+    extension = os.path.splitext(input_image_path)[1]
     if output_dir is None:
         output_dir = os.getcwd()
     output_image_path = os.path.join(
         output_dir,
         os.path.splitext(input_image_path)[0]
     )
-    out_image = "{}__{}x{}.jpg".format(
+    out_image = "{}__{}x{}{}".format(
         output_image_path,
         target_size[0],
-        target_size[1]
+        target_size[1],
+        extension
     )
     return out_image
 
@@ -95,6 +96,10 @@ if __name__ == "__main__":
         if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
             print("Изображение может быть непропорциональным")
     target_size = get_sizes(scale, orig_img.size, width, height)
-    output_image_path = get_output_path(target_size, output_dir)
+    output_image_path = get_output_path(
+        target_size,
+        output_dir,
+        input_image_path
+    )
     resize_image(output_image_path, target_size)
     print("Готово!")
