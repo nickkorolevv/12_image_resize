@@ -1,6 +1,7 @@
 from PIL import Image
 import argparse
 import os
+from argparse import ArgumentTypeError
 
 
 def create_parser():
@@ -13,11 +14,17 @@ def create_parser():
     return parser
 
 
-def check_input(parsargs):
-    if not(parsargs.height or parsargs.width or parsargs.scale):
-        return None
-    else:
-        return parsargs
+def check_args(height, width, scale, output_dir, input_image_path):
+    if not(height or width or scale):
+        raise ArgumentTypeError("Параметры не введены")
+    if output_dir and not (os.path.isdir(output_dir)):
+        raise FileNotFoundError("Такой директории не существует")
+    if not (os.path.exists(input_image_path)):
+        raise FileNotFoundError("Файла не сущетсвует")
+    if scale and (width or height):
+        raise ArgumentTypeError(
+            "Ошибка! Невозможно задать высоту, ширину и масштаб одновременно"
+        )
 
 
 def get_ratio(new_size, original_size):
@@ -34,67 +41,60 @@ def is_ratio_changed(width_original, height_orignal, width, height):
 def get_sizes(scale, original_sizes, width=None, height=None):
     width_original, height_original = original_sizes
     if (width and height):
-        created_size = (width, height)
-        if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
-            print("Изображение может быть непропорциональным")
-        return created_size
+        target_size = (width, height)
+        return target_size
     elif width:
-        created_size = (
+        target_size = (
             width,
             int((get_ratio(width, width_original))*height_original)
         )
-        return created_size
+        return target_size
     elif height:
-        created_size = (
+        target_size = (
             int((get_ratio(height, height_original))*width_original),
             height
         )
-        return created_size
+        return target_size
     elif scale:
-        created_size = (int(scale*width_original), int(scale*height_original))
-        return created_size
+        target_size = (int(scale*width_original), int(scale*height_original))
+        return target_size
 
 
-def get_output_path(created_size, output_dir):
-    if output_dir:
-        output_image_path = os.path.join(
-            output_dir,
-            os.path.splitext(input_image_path)[0]
-        )
-    elif output_dir is None:
+def get_output_path(target_size, output_dir):
+    if output_dir is None:
         output_dir = os.getcwd()
-        output_image_path = os.path.join(
-            output_dir,
-            os.path.splitext(input_image_path)[0]
-        )
+    output_image_path = os.path.join(
+        output_dir,
+        os.path.splitext(input_image_path)[0]
+    )
     out_image = "{}__{}x{}.jpg".format(
         output_image_path,
-        created_size[0],
-        created_size[1]
+        target_size[0],
+        target_size[1]
     )
     return out_image
 
 
-def change_image(output_image_path, created_size):
-    resized_image = orig_img.resize(created_size, Image.ANTIALIAS)
+def resize_image(output_image_path, target_size):
+    resized_image = orig_img.resize(target_size, Image.ANTIALIAS)
     resized_image.save(output_image_path)
 
 
 if __name__ == "__main__":
     parser = create_parser()
     parsargs = parser.parse_args()
-    scale, input_image_path, output_dir = (parsargs.scale, parsargs.input, parsargs.output)
+    scale, input_image_path, output_dir = (
+        parsargs.scale,
+        parsargs.input,
+        parsargs.output
+    )
     width, height = (parsargs.width, parsargs.height)
+    check_args(height, width, scale, output_dir, input_image_path)
     orig_img = Image.open(input_image_path)
-    if check_input(parsargs) is None:
-        exit("Параметры не введены")
-    if output_dir and not(os.path.isdir(output_dir)):
-        exit("Такой директории не существует")
-    if not(os.path.exists(parsargs.input)):
-        exit("Файла не сущетсвует")
-    if scale and (width or height):
-        exit("Ошибка! Невозможно задать высоту, ширину и масштаб одновременно")
-    created_size = get_sizes(scale, orig_img.size, width, height)
-    output_image_path = get_output_path(created_size, output_dir)
-    change_image(output_image_path, created_size)
+    if width and height:
+        if is_ratio_changed(orig_img.size[0], orig_img.size[1], width, height):
+            print("Изображение может быть непропорциональным")
+    target_size = get_sizes(scale, orig_img.size, width, height)
+    output_image_path = get_output_path(target_size, output_dir)
+    resize_image(output_image_path, target_size)
     print("Готово!")
